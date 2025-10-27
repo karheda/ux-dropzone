@@ -92,21 +92,17 @@ export default class extends Controller {
     }
 
     _renderFiles(key, file) {
-        if (!file) {
-            return;
-        }
+        if (this.previewTargets.length >1 || (this.previewTargets.length === 1 && this.previewTargets[0].style.display === "flex")) {
+            if (key <= 0) {
+                key = this.previewTargets.length;
+            }
 
-        if (this.previewTargets.length > 1 && key <= 0) {
-            key = this.previewTargets.length;
-        }
-
-        if(key > 0) {
             const elementToInsert = this.previewTargets[0].cloneNode(true);
-            elementToInsert.style.display ='flex';
+            elementToInsert.style.display = 'flex';
             this.previewsContainerTarget.appendChild(elementToInsert);
-            const clearButton = this.previewClearButtonTargets[key];
+            const clearButton = elementToInsert.querySelector('[data-symfony--ux-dropzone--dropzone-id-param]');
             this.previewFilenameTargets[key].textContent = file.name;
-            if(clearButton) {
+            if (clearButton) {
                 clearButton.setAttribute('data-symfony--ux-dropzone--dropzone-id-param', key);
             }
         } else {
@@ -117,11 +113,11 @@ export default class extends Controller {
     }
 
     _populateImagePreview(key, file: Blob) {
-        if (typeof FileReader === "undefined") {
+        if (typeof FileReader === "undefined" || !file) {
             return;
         }
         if (this.previewTargets.length > 1 && key <= 0) {
-            key = this.previewTargets.length -1;
+            key = this.previewTargets.length - 1;
         }
         const reader = new FileReader();
         reader.addEventListener("load", (event) => {
