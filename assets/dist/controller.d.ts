@@ -7,13 +7,24 @@ declare class export_default extends Controller {
     readonly previewClearButtonTarget: HTMLButtonElement;
     readonly previewFilenameTarget: HTMLDivElement;
     readonly previewImageTarget: HTMLDivElement;
+    readonly previewClearButtonTargets: HTMLButtonElement;
+    readonly previewTargets: HTMLDivElement[];
+    readonly previewFilenameTargets: HTMLDivElement[];
+    readonly previewImageTargets: HTMLDivElement[];
+    readonly previewsContainerTarget: HTMLDivElement;
     static targets: string[];
     initialize(): void;
     connect(): void;
     disconnect(): void;
-    clear(): void;
+    clear(event?: {
+        target?: HTMLElement;
+        params?: {
+            id?: number;
+        };
+    }): void;
     onInputChange(event: any): void;
-    _populateImagePreview(file: Blob): void;
+    _renderFiles(key: number, file: File): void;
+    _populateImagePreview(key: number, file: Blob): void;
     onDragEnter(): void;
     onDragLeave(event: any): void;
     private dispatchEvent;

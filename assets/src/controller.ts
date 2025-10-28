@@ -16,6 +16,10 @@ export default class extends Controller {
     declare readonly previewClearButtonTarget: HTMLButtonElement;
     declare readonly previewFilenameTarget: HTMLDivElement;
     declare readonly previewImageTarget: HTMLDivElement;
+    declare readonly previewClearButtonTargets: HTMLButtonElement;
+    declare readonly previewTargets: HTMLDivElement[];
+    declare readonly previewFilenameTargets: HTMLDivElement[];
+    declare readonly previewImageTargets: HTMLDivElement[];
     declare readonly previewsContainerTarget: HTMLDivElement;
 
     static targets = ['input', 'placeholder', 'preview', 'previewClearButton', 'previewFilename', 'previewImage', 'previewsContainer'];
@@ -49,22 +53,24 @@ export default class extends Controller {
         this.element.removeEventListener('dragleave', this.onDragLeave);
     }
 
-    clear(event = {}) {
-        const button = event?.target;
-        const id = event?.params?.id;
-        if (!button) return;
+    clear(event?: { target?: HTMLElement; params?: { id?: number } }) {
+        if (event) {
+            const button = event?.target;
+            const id = event?.params?.id;
+            if (!button) return;
 
-        const preview = button.closest('[data-symfony--ux-dropzone--dropzone-target="preview"]')
-        if (!preview) return;
+            const preview = button.closest('[data-symfony--ux-dropzone--dropzone-target="preview"]')
+            if (!preview) return;
 
-        if (typeof id === 'number') {
-            if (id > 0) {
-                preview.remove();
-            } else {
-                this.previewTargets[0].style.display = "none";
-                this.previewImageTargets[0].style.display = "none";
-                this.previewImageTargets[0].style.backgroundImage = "none";
-                this.previewFilenameTargets[0].textContent = "";
+            if (typeof id === 'number') {
+                if (id > 0) {
+                    preview.remove();
+                } else {
+                    this.previewTargets[0].style.display = "none";
+                    this.previewImageTargets[0].style.display = "none";
+                    this.previewImageTargets[0].style.backgroundImage = "none";
+                    this.previewFilenameTargets[0].textContent = "";
+                }
             }
         }
 
@@ -94,19 +100,20 @@ export default class extends Controller {
         this.dispatchEvent("change", files);
     }
 
-    _renderFiles(key, file) {
+    _renderFiles(key: number, file: File) {
         if (this.previewTargets.length >1 || (this.previewTargets.length === 1 && this.previewTargets[0].style.display === "flex")) {
             if (key <= 0) {
                 key = this.previewTargets.length;
             }
 
             const elementToInsert = this.previewTargets[0].cloneNode(true);
-            elementToInsert.style.display = 'flex';
             this.previewsContainerTarget.appendChild(elementToInsert);
-            const clearButton = elementToInsert.querySelector('[data-symfony--ux-dropzone--dropzone-id-param]');
+            const newPreviewTarget = this.previewTargets[this.previewTargets.length - 1];
+            newPreviewTarget.style.display = 'flex';
+            const clearButton = newPreviewTarget.querySelector('[data-symfony--ux-dropzone--dropzone-id-param]');
             this.previewFilenameTargets[key].textContent = file.name;
             if (clearButton) {
-                clearButton.setAttribute('data-symfony--ux-dropzone--dropzone-id-param', key);
+                clearButton.setAttribute('data-symfony--ux-dropzone--dropzone-id-param', key.toString());
             }
         } else {
             this.previewFilenameTargets[0].textContent = file.name;
@@ -115,7 +122,7 @@ export default class extends Controller {
         }
     }
 
-    _populateImagePreview(key, file: Blob) {
+    _populateImagePreview(key: number, file: Blob) {
         if (typeof FileReader === "undefined" || !file) {
             return;
         }
@@ -123,7 +130,7 @@ export default class extends Controller {
             key = this.previewTargets.length - 1;
         }
         const reader = new FileReader();
-        reader.addEventListener("load", (event) => {
+        reader.addEventListener("load", (event: any) => {
             this.previewImageTargets[key].style.display = "block";
             this.previewImageTargets[key].style.backgroundImage = `url("${event.target.result}")`;
         });
