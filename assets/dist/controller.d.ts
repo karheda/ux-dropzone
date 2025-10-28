@@ -11,8 +11,9 @@ declare class export_default extends Controller {
     readonly previewTargets: HTMLDivElement[];
     readonly previewFilenameTargets: HTMLDivElement[];
     readonly previewImageTargets: HTMLDivElement[];
-    readonly previewsContainerTarget: HTMLDivElement;
+    readonly previewContainerTarget: HTMLDivElement;
     static targets: string[];
+    files: Map<string, File>;
     initialize(): void;
     connect(): void;
     disconnect(): void;
@@ -23,10 +24,14 @@ declare class export_default extends Controller {
         };
     }): void;
     onInputChange(event: any): void;
-    _renderFiles(key: number, file: File): void;
+    private renderPreview;
+    private buildPreview;
     _populateImagePreview(key: number, file: Blob): void;
     onDragEnter(): void;
     onDragLeave(event: any): void;
+    private updateFileInput;
+    private addFiles;
+    private isImage;
     private dispatchEvent;
 }
 
