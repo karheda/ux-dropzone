@@ -70,7 +70,10 @@ export default class extends Controller {
 
         this.inputTarget.value = "";
         this.inputTarget.style.display = "block";
-        this.placeholderTarget.style.display = "block";
+        if (this.previewTargets.length === 1 && this.previewTargets[0].style.display === "none") {
+            this.placeholderTarget.style.display = "block";
+        }
+
         this.dispatchEvent("clear");
     }
 
