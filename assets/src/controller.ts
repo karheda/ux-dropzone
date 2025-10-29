@@ -68,7 +68,7 @@ export default class extends Controller {
         this.dispatchEvent("clear");
     }
 
-    onInputChange(event: any) {
+    onInputChange() {
         const files = this.inputTarget.files;
 
         if (!files || files.length <= 0) {
