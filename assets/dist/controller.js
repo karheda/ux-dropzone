@@ -4,6 +4,7 @@ var controller_default = class extends Controller {
   constructor() {
     super(...arguments);
     this.files = /* @__PURE__ */ new Map();
+    this.dataTransfer = new DataTransfer();
   }
   initialize() {
     this.clear = this.clear.bind(this);
@@ -24,13 +25,20 @@ var controller_default = class extends Controller {
     this.element.removeEventListener("dragleave", this.onDragLeave);
   }
   clear(event) {
-    if (event) {
-      console.log(event.target);
+    if (event?.params) {
+      const filename = event.params.filename;
+      if (filename && this.files.has(filename)) {
+        this.files.delete(filename);
+        this.updateFileInput();
+        this.renderPreview();
+      }
     }
     if (!this.inputTarget || !this.inputTarget.files || this.inputTarget?.files?.length === 0) {
       this.placeholderTarget.style.display = "block";
+      if (!this.isMultiple) {
+        this.inputTarget.style.display = "block";
+      }
     }
-    this.updateFileInput();
     this.dispatchEvent("clear");
   }
   onInputChange(event) {
@@ -38,93 +46,89 @@ var controller_default = class extends Controller {
     if (!files || files.length <= 0) {
       return;
     }
-    this.files.clear();
-    this.addFiles(Array.from(files));
+    if (!this.isMultiple && this.files.size > 0) {
+      return;
+    }
+    const selectedFiles = this.isMultiple ? Array.from(files) : Array.from(files).slice(0, 1);
+    this.addFiles(selectedFiles);
+    this.updateFileInput();
     this.renderPreview();
     this.dispatchEvent("change", files);
   }
-
   renderPreview() {
-    this.element.classList.add("dropzone-preview-container-hidden");
-    this.previewTargets.forEach((preview, index) => {
-      if (index > 0) preview.remove();
-    });
+    this.clearPreviewContainer();
     for (const file of this.files.values()) {
       const preview = this.buildPreview(file);
       if (preview) {
         this.previewContainerTarget.appendChild(preview);
       }
     }
-    if (this.previewTargets.length > 0) {
-      this.element.classList.remove("dropzone-preview-container-hidden");
+    if (this.previewTargets.length > 1) {
+      this.placeholderTarget.style.display = "none";
+      if (!this.isMultiple) {
+        this.inputTarget.style.display = "none";
+      } else {
+        this.inputTarget.style.display = "block";
+      }
     }
+  }
+  clearPreviewContainer() {
+    const previews = this.previewTargets;
+    previews.slice(1).forEach((el) => el.remove());
   }
   buildPreview(file, element) {
     if (!element) {
-      element = this.previewTargets[0].cloneNode(true);
+      element = this.previewContainerTarget.firstElementChild?.cloneNode(true);
     }
+    element.style.display = "flex";
     const fileName = element.querySelector(".dropzone-preview-filename");
     if (fileName) {
       fileName.textContent = file.name;
     }
+    const button = element.querySelector(".dropzone-preview-button");
+    if (button) {
+      button.setAttribute("data-symfony--ux-dropzone--dropzone-filename-param", file.name);
+    }
+    this._populateImagePreview(element, file);
+    return element;
+  }
+  _populateImagePreview(element, file) {
     const image = element.querySelector(".dropzone-preview-image");
     if (image && this.isImage(file) && typeof FileReader !== "undefined") {
       const reader = new FileReader();
-      image.classList.add("dropzone-preview-image-hidden");
       reader.addEventListener("load", (event) => {
-        image.querySelector(".dropzone-preview-image-placeholder")?.remove();
+        image.querySelector(".dropzone-preview-image")?.remove();
         image.style.backgroundImage = `url('${event.target.result}')`;
-        image.classList.remove("dropzone-preview-image-hidden");
+        image.style.display = "block";
       });
       reader.readAsDataURL(file);
     }
-    element.style.display = "block";
-    return element;
-  }
-  _populateImagePreview(key, file) {
-    if (typeof FileReader === "undefined" || !file) {
-      return;
-    }
-    if (this.previewTargets.length > 1 && key <= 0) {
-      key = this.previewTargets.length - 1;
-    }
-    const reader = new FileReader();
-    reader.addEventListener("load", (event) => {
-      this.previewImageTargets[key].style.display = "block";
-      this.previewImageTargets[key].style.backgroundImage = `url("${event.target.result}")`;
-    });
-    reader.readAsDataURL(file);
   }
   onDragEnter() {
     this.inputTarget.style.display = "block";
-    this.placeholderTarget.style.display = "block";
-    this.previewTarget.style.display = "none";
   }
   onDragLeave(event) {
     event.preventDefault();
-    if (!this.element.contains(event.relatedTarget)) {
-      this.inputTarget.style.display = "none";
-      this.placeholderTarget.style.display = "none";
-      this.previewTarget.style.display = "block";
-    }
   }
   updateFileInput() {
-    const dataTransfer = new DataTransfer();
+    this.dataTransfer = new DataTransfer();
     for (const file of this.files.values()) {
-      dataTransfer.items.add(file);
+      this.dataTransfer.items.add(file);
     }
-    this.inputTarget.files = dataTransfer.files;
+    this.inputTarget.files = this.dataTransfer.files;
   }
-  /*private get firstFile(): File | undefined {
-      return this.files.values().next().value;
-  }*/
   addFiles(files) {
+    console.log("Add files", this.files);
     for (const file of files) {
       this.files.set(file.name, file);
     }
+    console.log("Add files after add", this.files);
   }
   isImage(file) {
     return typeof file.type !== "undefined" && file.type.indexOf("image") !== -1;
+  }
+  get isMultiple() {
+    return this.inputTarget.multiple;
   }
   dispatchEvent(name, payload = {}) {
     this.dispatch(name, { detail: payload, prefix: "dropzone" });
