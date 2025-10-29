@@ -105,7 +105,7 @@ export default class extends Controller {
         }
     }
 
-    private clearPreviewContainer () {
+    private clearPreviewContainer() {
         const previews = this.previewTargets;
         previews.slice(1).forEach(el => el.remove());
     }
@@ -163,12 +163,10 @@ export default class extends Controller {
     }
 
     private addFiles(files: File[]) {
-        console.log('Add files', this.files);
         for (const file of files) {
             this.files.set(file.name, file);
 
         }
-        console.log('Add files after add', this.files);
     }
 
     private isImage(file: File): boolean {

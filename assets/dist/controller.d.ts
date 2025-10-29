@@ -17,7 +17,7 @@ declare class export_default extends Controller {
             filename?: string;
         };
     }): void;
-    onInputChange(event: any): void;
+    onInputChange(): void;
     private renderPreview;
     private clearPreviewContainer;
     private buildPreview;

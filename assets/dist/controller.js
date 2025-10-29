@@ -41,7 +41,7 @@ var controller_default = class extends Controller {
     }
     this.dispatchEvent("clear");
   }
-  onInputChange(event) {
+  onInputChange() {
     const files = this.inputTarget.files;
     if (!files || files.length <= 0) {
       return;
@@ -118,11 +118,9 @@ var controller_default = class extends Controller {
     this.inputTarget.files = this.dataTransfer.files;
   }
   addFiles(files) {
-    console.log("Add files", this.files);
     for (const file of files) {
       this.files.set(file.name, file);
     }
-    console.log("Add files after add", this.files);
   }
   isImage(file) {
     return typeof file.type !== "undefined" && file.type.indexOf("image") !== -1;
