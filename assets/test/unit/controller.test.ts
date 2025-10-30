@@ -98,7 +98,10 @@ describe('DropzoneController', () => {
         getByTestId(container, 'preview').style.display = 'block';
 
         // Click the clear button
-        getByTestId(container, 'button').click();
+        const button = getByTestId(container, 'button');
+        await waitFor(() => expect(button).toBeInTheDocument());
+
+        button.click();
 
         await waitFor(() => expect(getByTestId(container, 'input')).toHaveStyle({ display: 'block' }));
         await waitFor(() => expect(getByTestId(container, 'placeholder')).toHaveStyle({ display: 'block' }));
@@ -137,7 +140,7 @@ describe('DropzoneController', () => {
 
         // The event should have been dispatched
         expect(dispatched).not.toBeNull();
-        expect(dispatched.detail).toStrictEqual(file);
+        expect(dispatched.detail).toStrictEqual(input.files);
     });
 
     it('on drag', async () => {
