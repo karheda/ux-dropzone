@@ -18,7 +18,6 @@ export default class extends Controller {
     static targets = ['input', 'placeholder', 'preview', 'previewClearButton', 'previewFilename', 'previewImage', 'previewContainer'];
 
     files: Map<string, File> = new Map<string, File>();
-    dataTransfer: DataTransfer = new DataTransfer();
 
     initialize() {
         this.clear = this.clear.bind(this);
@@ -76,7 +75,7 @@ export default class extends Controller {
         }
 
         if (!this.isMultiple && this.files.size > 0) {
-            return;
+            this.inputTarget.style.display = "none";
         }
 
         const selectedFiles = this.isMultiple ? Array.from(files) : Array.from(files).slice(0, 1);
@@ -155,17 +154,16 @@ export default class extends Controller {
     }
 
     private updateFileInput() {
-        this.dataTransfer = new DataTransfer();
+        const dataTransfer = new DataTransfer();
         for (const file of this.files.values()) {
-            this.dataTransfer.items.add(file);
+            dataTransfer.items.add(file);
         }
-        this.inputTarget.files = this.dataTransfer.files;
+        this.inputTarget.files = dataTransfer.files;
     }
 
     private addFiles(files: File[]) {
         for (const file of files) {
             this.files.set(file.name, file);
-
         }
     }
 

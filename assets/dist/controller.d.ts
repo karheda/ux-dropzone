@@ -7,7 +7,6 @@ declare class export_default extends Controller {
     readonly previewContainerTarget: HTMLDivElement;
     static targets: string[];
     files: Map<string, File>;
-    dataTransfer: DataTransfer;
     initialize(): void;
     connect(): void;
     disconnect(): void;

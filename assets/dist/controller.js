@@ -4,7 +4,6 @@ var controller_default = class extends Controller {
   constructor() {
     super(...arguments);
     this.files = /* @__PURE__ */ new Map();
-    this.dataTransfer = new DataTransfer();
   }
   initialize() {
     this.clear = this.clear.bind(this);
@@ -47,7 +46,7 @@ var controller_default = class extends Controller {
       return;
     }
     if (!this.isMultiple && this.files.size > 0) {
-      return;
+      this.inputTarget.style.display = "none";
     }
     const selectedFiles = this.isMultiple ? Array.from(files) : Array.from(files).slice(0, 1);
     this.addFiles(selectedFiles);
@@ -111,11 +110,11 @@ var controller_default = class extends Controller {
     event.preventDefault();
   }
   updateFileInput() {
-    this.dataTransfer = new DataTransfer();
+    const dataTransfer = new DataTransfer();
     for (const file of this.files.values()) {
-      this.dataTransfer.items.add(file);
+      dataTransfer.items.add(file);
     }
-    this.inputTarget.files = this.dataTransfer.files;
+    this.inputTarget.files = dataTransfer.files;
   }
   addFiles(files) {
     for (const file of files) {

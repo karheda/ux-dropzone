@@ -45,25 +45,27 @@ describe('DropzoneController', () => {
                      data-testid="placeholder">
                     Placeholder
                 </div>
+                <div class="dropzone-preview-container"
+                    data-dropzone-target="previewContainer">
+                    <div class="dropzone-preview"
+                         data-dropzone-target="preview"
+                         data-testid="preview"
+                         style="display: none">
 
-                <div class="dropzone-preview"
-                     data-dropzone-target="preview"
-                     data-testid="preview"
-                     style="display: none">
+                        <button type="button"
+                                class="dropzone-preview-button"
+                                data-dropzone-target="previewClearButton"
+                                data-testid="button"></button>
 
-                    <button type="button"
-                            class="dropzone-preview-button"
-                            data-dropzone-target="previewClearButton"
-                            data-testid="button"></button>
+                        <div class="dropzone-preview-image"
+                             data-dropzone-target="previewImage"
+                             data-testid="preview-image"
+                             style="display: none"></div>
 
-                    <div class="dropzone-preview-image"
-                         data-dropzone-target="previewImage"
-                         data-testid="preview-image"
-                         style="display: none"></div>
-
-                    <div class="dropzone-preview-filename"
-                         data-dropzone-target="previewFilename"
-                         data-testid="preview-filename"></div>
+                        <div class="dropzone-preview-filename"
+                             data-dropzone-target="previewFilename"
+                             data-testid="preview-filename"></div>
+                    </div>
                 </div>
             </div>
         `);
@@ -120,7 +122,13 @@ describe('DropzoneController', () => {
         const input = getByTestId(container, 'input');
         const file = new File(['hello'], 'hello.png', { type: 'image/png' });
 
-        await user.upload(input, file);
+        Object.defineProperty(input, 'files', {
+            configurable: true,
+            writable: true,
+            value: [file],
+        });
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+
         expect(input.files[0]).toStrictEqual(file);
 
         // The dropzone should be in preview mode
